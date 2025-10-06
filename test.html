@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Generador de presupuestos - camisetas (SINTRA)</title>
+  <style>
+    :root{font-family:Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;}
+    body{margin:0;padding:20px;background:#f6f8fb;color:#111}
+    .container{max-width:1100px;margin:0 auto;background:#fff;padding:20px;border-radius:10px;box-shadow:0 6px 18px rgba(0,0,0,.06)}
+    h1{margin:0 0 12px;font-size:20px}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    label{display:block;font-size:13px;margin-bottom:6px}
+    input,select{width:100%;padding:8px;border:1px solid #d7dce6;border-radius:6px;font-size:14px}
+    .row{margin-bottom:12px}
+    button{background:#0b74ff;color:#fff;border:0;padding:10px 14px;border-radius:8px;cursor:pointer}
+    .muted{color:#52606d;font-size:13px}
+    .results{margin-top:18px;padding:12px;border-radius:8px;background:#fbfdff;border:1px solid #e7f0ff}
+    table{width:100%;border-collapse:collapse}
+    td,th{padding:8px;border-bottom:1px solid #eef3fb;text-align:left}
+    .recommend{padding:10px;border-radius:8px;background:#fff7e6;border:1px solid #ffecb5}
+    .actions{display:flex;gap:8px}
+    .small{font-size:13px;padding:6px 8px}
+    .export{background:#1b7a4f}
+    .inline{display:flex;gap:8px}
+    .tests{display:flex;gap:8px;margin-top:8px}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Generador de presupuestos para impresión en camisetas — Modelo SINTRA</h1>
+    <p class="muted">Modelo fijo: <strong>SINTRA</strong> (100% algodón, 155 g/m²). Selecciona color, cantidad y tamaño del diseño; el sistema aplicará el precio proveedor automáticamente y calculará área total necesaria, comparará opciones de lámina y mostrará las métricas financieras solicitadas.</p>
+
+    <div class="grid">
+      <div>
+        <div class="row">
+          <label>Color de la camiseta</label>
+          <select id="color">
+            <option>Blanco</option>
+            <option>Negro</option>
+            <option>Rojo</option>
+            <option>Amarillo</option>
+            <option>Marino</option>
+            <option>Gris Vigoré</option>
+            <option>Verde Botella</option>
+            <option>Azul Royal Melange</option>
+            <option>Rosa Claro</option>
+            <option>Rosetto</option>
+            <option>Celeste</option>
+            <option>Verde Menta</option>
+            <option>Alta Granada</option>
+          </select>
+        </div>
+
+        <div class="row"><label>Cantidad total de camisetas</label><input id="cantidad" type="number" value="100" min="1" /></div>
+
+        <div class="row"><label>Tamaño del dibujo (cm) — ancho × alto</label>
+          <div class="inline"><input id="ancho" type="number" value="30" min="1" placeholder="ancho cm" /><input id="alto" type="number" value="30" min="1" placeholder="alto cm" /></div>
+        </div>
+
+        <div class="row"><label>Margen entre diseños en lámina (cm)</label><input id="margen" type="number" value="1" min="0" /></div>
+
+        <div class="row"><label>Tipo de prenda</label>
+          <select id="prenda"><option value="camiseta">Camiseta</option><option value="sudadera">Sudadera</option></select>
+        </div>
+
+        <h3>Opciones de lámina / suministro</h3>
+        <div class="row">
+          <label>Selecciona una opción (el sistema mostrará también la comparativa)</label>
+          <select id="opcionLamina">
+            <option value="auto">Comparar todas (recomendado)</option>
+            <option value="grande">Lámina Grande — 58×100 cm — 12€</option>
+            <option value="mediana">Lámina Mediana — 30×100 cm — 7€</option>
+            <option value="rollo">Rollo (€/metro) — 30×100 cm por metro — 6€/m</option>
+          </select>
+        </div>
+
+        <h3>Precios proveedor camisetas (sin IVA)</h3>
+        <p class="muted">La tabla se aplica automáticamente según la cantidad total (packs)</p>
+        <div class="row">
+          <table>
+            <tr><th>Rango</th><th>Blanco</th><th>Color</th></tr>
+            <tr><td>Hasta 15</td><td>2,30 €</td><td>2,55 €</td></tr>
+            <tr><td>Hasta 25</td><td>2,24 €</td><td>2,49 €</td></tr>
+            <tr><td>Hasta 50</td><td>2,17 €</td><td>2,42 €</td></tr>
+            <tr><td>Más de 50</td><td>2,04 €</td><td>2,30 €</td></tr>
+          </table>
+        </div>
+
+        <h3>Precios DTF</h3>
+        <div class="row"><label>Precio impresión por lámina (coste operativo) (€)</label><input id="costeImpresion" type="number" value="0.5" step="0.01" /></div>
+        <div class="row"><label>Precio venta estimado por camiseta (€)</label><input id="precioVenta" type="number" value="15.00" step="0.01" /></div>
+
+        <div class="row actions">
+          <button id="calcular">Calcular y generar informe</button>
+          <button id="exportar" class="small">Exportar CSV</button>
+        </div>
+
+        <div class="row">
+          <label>Pruebas rápidas (casos de test)</label>
+          <div class="tests">
+            <button id="test1" class="small">Prueba 1: 10 Blanco 30×30</button>
+            <button id="test2" class="small">Prueba 2: 40 Negro 30×30</button>
+            <button id="test3" class="small">Prueba 3: 120 Color 30×30</button>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div id="salida" class="results">
+          <div id="resumen"></div>
+          <div id="comparacion"></div>
+          <div id="finanzas"></div>
+        </div>
+      </div>
+    </div>
+
+    <p class="muted" style="margin-top:12px">Explicación rápida: el generador calcula el <strong>área total de diseño</strong> (cantidad × ancho × alto), compara las opciones de lámina (o rollo) usando rendimientos reales, y devuelve inversión en prendas, inversión en DTF (láminas + coste impresión), inversión total, ingresos esperados, ganancia neta y rentabilidad porcentual.</p>
+  </div>
+<script>
+// --- Datos fijos ---
+const preciosProveedor = {
+  blanco: [{max:15,price:2.30},{max:25,price:2.24},{max:50,price:2.17},{max:Infinity,price:2.04}],
+  color: [{max:15,price:2.55},{max:25,price:2.49},{max:50,price:2.42},{max:Infinity,price:2.30}]
+};
+
+// Dimensiones de láminas (cm)
+const laminaData = {
+  grande: {width:58, height:100, price:12},
+  mediana: {width:30, height:100, price:7},
+  rollo: {width:30, heightPerMeter:100}
+};
+
+function getPrecioProveedor(color, qty){
+  const key = (String(color).toLowerCase() === 'blanco') ? 'blanco' : 'color';
+  for(const tier of preciosProveedor[key]) if(qty <= tier.max) return tier.price;
+  return preciosProveedor[key][preciosProveedor[key].length-1].price;
+}
+
+function formatEuro(v){ return isFinite(v)? "€ "+v.toFixed(2):"—"; }
+
+// ✅ NUEVA FUNCIÓN corregida
+function designsPerSheet(sheetW, sheetH, designW, designH, margin){
+  const cols1 = Math.floor((sheetW + margin) / (designW + margin));
+  const rows1 = Math.floor((sheetH + margin) / (designH + margin));
+  const count1 = Math.max(0, cols1 * rows1);
+
+  const cols2 = Math.floor((sheetW + margin) / (designH + margin));
+  const rows2 = Math.floor((sheetH + margin) / (designW + margin));
+  const count2 = Math.max(0, cols2 * rows2);
+
+  return Math.max(count1, count2);
+}
+
+function calcular(){
+  const color = document.getElementById('color').value;
+  const cantidad = Number(document.getElementById('cantidad').value)||0;
+  const ancho = Number(document.getElementById('ancho').value)||0;
+  const alto = Number(document.getElementById('alto').value)||0;
+  const margen = Number(document.getElementById('margen').value)||0;
+  const opcionLamina = document.getElementById('opcionLamina').value;
+  const costeImpresion = Number(document.getElementById('costeImpresion').value)||0;
+  const precioVenta = Number(document.getElementById('precioVenta').value)||0;
+
+  const precioUnitProveedor = getPrecioProveedor(color,cantidad);
+  const inversionPrendas = precioUnitProveedor * cantidad;
+  const areaPorDiseno = ancho * alto;
+  const areaTotal = areaPorDiseno * cantidad;
+
+  const opciones = [];
+
+  // LÁMINA GRANDE
+  const dpsG = designsPerSheet(laminaData.grande.width, laminaData.grande.height, ancho, alto, margen);
+  const lamG = dpsG>0 ? Math.ceil(cantidad/dpsG):Infinity;
+  const costG = lamG*laminaData.grande.price + lamG*costeImpresion;
+
+  opciones.push({
+    id:"grande", name:"Lámina Grande 58×100", rend:dpsG, unidades:lamG, costeDTF:costG
+  });
+
+  // LÁMINA MEDIANA
+  const dpsM = designsPerSheet(laminaData.mediana.width, laminaData.mediana.height, ancho, alto, margen);
+  const lamM = dpsM>0 ? Math.ceil(cantidad/dpsM):Infinity;
+  const costM = lamM*laminaData.mediana.price + lamM*costeImpresion;
+
+  opciones.push({
+    id:"mediana", name:"Lámina Mediana 30×100", rend:dpsM, unidades:lamM, costeDTF:costM
+  });
+
+  // ROLLO
+  const dpsR = designsPerSheet(laminaData.rollo.width, laminaData.rollo.heightPerMeter, ancho, alto, margen);
+  const metros = dpsR>0 ? Math.ceil(cantidad/dpsR):Infinity;
+  const precioPorMetro = metros>=3?6:7;
+  const costR = metros*(precioPorMetro+costeImpresion);
+
+  opciones.push({
+    id:"rollo", name:"Rollo (€/metro)", rend:dpsR, unidades:metros, costeDTF:costR, precioPorMetro
+  });
+
+  const opcionesValidas = opciones.filter(o=>isFinite(o.costeDTF));
+  const mejor = opcionesValidas.length ? opcionesValidas.reduce((a,b)=>a.costeDTF<b.costeDTF?a:b):null;
+
+  // Mostrar resumen
+  document.getElementById('resumen').innerHTML=`
+  <h2>Resumen rápido</h2>
+  <table>
+    <tr><th>Color</th><td>${color}</td></tr>
+    <tr><th>Cantidad</th><td>${cantidad}</td></tr>
+    <tr><th>Tamaño diseño</th><td>${ancho}×${alto} cm</td></tr>
+    <tr><th>Área por diseño</th><td>${areaPorDiseno} cm²</td></tr>
+    <tr><th>Área total</th><td>${areaTotal} cm²</td></tr>
+    <tr><th>Precio proveedor</th><td>${formatEuro(precioUnitProveedor)}</td></tr>
+    <tr><th>Inversión prendas</th><td>${formatEuro(inversionPrendas)}</td></tr>
+  </table>`;
+
+  // Comparativa
+  let htmlComp=`<h3>Comparativa de suministros (DTF)</h3><table>
+  <tr><th>Opción</th><th>Rendimiento</th><th>Unidades</th><th>Coste DTF</th><th>Inversión prendas</th><th>Total</th></tr>`;
+  opciones.forEach(o=>{
+    const total = inversionPrendas + o.costeDTF;
+    htmlComp+=`<tr ${mejor && o.id===mejor.id?'class="recommend"':''}>
+      <td>${o.name}${mejor && o.id===mejor.id?' ✅':''}</td>
+      <td>≈ ${o.rend} diseños/${o.id==='rollo'?'m':'lámina'}</td>
+      <td>${isFinite(o.unidades)?o.unidades:'—'}</td>
+      <td>${formatEuro(o.costeDTF)}${o.id==='rollo'?' <small>('+o.precioPorMetro+'€/m)</small>':''}</td>
+      <td>${formatEuro(inversionPrendas)}</td>
+      <td><strong>${formatEuro(total)}</strong></td>
+    </tr>`;
+  });
+  htmlComp+='</table>';
+  document.getElementById('comparacion').innerHTML=htmlComp;
+
+  // Finanzas
+  const invDTF = mejor?mejor.costeDTF:Infinity;
+  const invTotal = inversionPrendas + invDTF;
+  const ingresos = precioVenta*cantidad;
+  const ganancia = ingresos - invTotal;
+  const rent = invTotal>0?(ganancia/invTotal*100):0;
+  document.getElementById('finanzas').innerHTML=`
+  <h3>Resultados financieros</h3>
+  <table>
+    <tr><th>Inversión prendas</th><td>${formatEuro(inversionPrendas)}</td></tr>
+    <tr><th>Inversión DTF</th><td>${formatEuro(invDTF)}</td></tr>
+    <tr><th>Inversión total</th><td><strong>${formatEuro(invTotal)}</strong></td></tr>
+    <tr><th>Ingresos esperados</th><td>${formatEuro(ingresos)}</td></tr>
+    <tr><th>Ganancia neta</th><td><strong>${formatEuro(ganancia)}</strong></td></tr>
+    <tr><th>Rentabilidad</th><td>${rent.toFixed(2)}%</td></tr>
+  </table>
+  <p class="muted">Opción recomendada: <strong>${mejor?mejor.name:'—'}</strong></p>`;
+}
+
+document.getElementById('calcular').addEventListener('click',calcular);
+</script>
+
